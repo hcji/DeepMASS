@@ -26,9 +26,9 @@ for (i in 1:nrow(challenges)){
         if (nrow(res.metfrag) < 1){
           next
         } else {
-          wh_true = which(res.metfrag$Identifier==true)[1]
-          score_true = res.metfrag$Score[wh_true]
-          rank <- length(which(res.metfrag$Score > score_true)) + 1
+          wh_true <- which(res.metfrag$Identifier==true)
+          score_true <- max(res.metfrag$Score[wh_true])
+          rank <- length(unique(as.character(res.metfrag$Identifier[res.metfrag$Score>score_true]))) + 1
           rank.metfrag[i,] <- c(keggid, rank)
           cat(paste(keggid, ': ', rank,'/', nrow(res.metfrag), '\n', sep = ''))
           break
