@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 from scipy import signal
 from scipy.sparse import csr_matrix, vstack, hstack
+from IsoSpecPy import IsoSpec
 from itertools import chain
 import json
 import requests
@@ -41,20 +42,28 @@ def progressBar(count,total,size):
     sys.stdout.write("\r" + str(int(count)).rjust(3,'0')+"/"+str(int(total)).rjust(3,'0') + ' [' + '='*int(percent/10)*size + ' '*(10-int(percent/10))*size + ']')
 
 def get_score(pred, real):
+    '''
+    Task: Evaluate the matching degree of DeepMASS score and FP score with dot product
+          when calculating FP score, some molecule may raising error, *compare_structure*
+          function will return -1 in such case. Here they are removed.
+    :param pred: DeepMASS score
+    :param real: FP score
+    '''
     keep = np.where(real >= 0)[0] 
     if len(keep)<1:
         return 0
     else:
-        score = sum(np.array(pred[keep]) * np.array(real[keep]))/len(keep)
-        '''
-        score = 0
-        for i in keep:
-            score += (1 - abs(pred[i] - real[i]) / max(pred[i], real[i])) * pred[i] / sum(pred)
-        '''
+        score = sum(np.array(pred[keep]) * np.array(real[keep])) / len(keep)
     return round(score, 3)
 
 
 def read_ms(csv, precursor = None, norm = True):
+    '''
+    Task: Read spectrum from csv file
+    :param csv: file path of spectrum
+    :param precursor: m/z of precursor
+    :param norm: whether to normalizate the spectrum or not
+    '''
     spec = pd.read_csv(csv)
     spec = spec.iloc[:,range(2)]
     spec.columns = ['mz', 'intensity']
@@ -64,6 +73,32 @@ def read_ms(csv, precursor = None, norm = True):
         keep = spec['mz'] < precursor + 1
         spec = spec.loc[keep]
     return spec
+	
+
+def isotope_pattern(formula, thres=0.99):
+    if type(formula) is not str:
+        raise ValueError('input formula must be a character')
+    isotope = IsoSpec.IsoFromFormula(formula, thres)
+    isotope = isotope.getConfsNumpy()
+    output = pd.DataFrame({'mass': isotope[0], 'intensity': np.exp(isotope[1])})
+    return output
+    
+
+def compare_isotope(measured, expected, tolerance=0.001):
+    if (type(measured) is not pd.DataFrame) or (type(expected) is not pd.DataFrame):
+        raise ValueError('input data must be pandas.DataFrame')
+    measured['intensity'] = measured['intensity']/sum(measured['intensity'])
+    expected['intensity'] = expected['intensity']/sum(expected['intensity'])
+    expected_m0 = expected['intensity'][0]
+    measured_m0 = measured['intensity'][0]
+    expected_m1 = sum(expected['intensity'][(expected['mass'] > expected['mass'][0] - tolerance + 0.997) & (expected['mass'] < expected['mass'][0] + tolerance + 1.006)])
+    measured_m1 = sum(measured['intensity'][(measured['mass'] > measured['mass'][0] - tolerance + 0.997) & (measured['mass'] < measured['mass'][0] + tolerance + 1.006)])
+    expected_m2 = sum(expected['intensity'][(expected['mass'] > expected['mass'][0] - tolerance + 1.994) & (expected['mass'] < expected['mass'][0] + tolerance + 2.013)])
+    measured_m2 = sum(measured['intensity'][(measured['mass'] > measured['mass'][0] - tolerance + 1.994) & (measured['mass'] < measured['mass'][0] + tolerance + 2.013)])
+    expected_m3 = sum(expected['intensity'][(expected['mass'] > expected['mass'][0] - tolerance + 2.991) & (expected['mass'] < expected['mass'][0] + tolerance + 3.018)])
+    measured_m3 = sum(measured['intensity'][(measured['mass'] > measured['mass'][0] - tolerance + 2.991) & (measured['mass'] < measured['mass'][0] + tolerance + 3.018)])
+    score = (1 - abs(expected_m0 - measured_m0)) * (1 - abs(expected_m1 - measured_m1)) * (1 - abs(expected_m2 - measured_m2)) * (1 - abs(expected_m3 - measured_m3))
+    return score
 
 
 def ms2vec(ms, precision=0.01, maxmz=2000):
