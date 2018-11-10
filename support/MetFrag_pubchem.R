@@ -16,6 +16,7 @@ rank.metfrag <- matrix(NA, nrow=nrow(challenges), ncol=2)
 colnames(rank.metfrag) <- c('kegg', 'rank')
 for (i in 1:nrow(challenges)){
     for (j in 1:1000){
+      # for fear of network disconnection, try 1000 times until successful process.
       keggid <- challenges[i, 'kegg']
       formula <- challenges[i, 'formula']
       spec.file <- paste(getwd(), '/data/spectra/measured_spectra/40V/', keggid, '.csv', sep='')
@@ -23,6 +24,7 @@ for (i in 1:nrow(challenges)){
       
       res.metfrag <- runMetFrag(formula, spec.file)
       if (class(res.metfrag)!='try-error'){
+        # sometimes, runMetFrag function raise unpredictable error, use try-catch here.
         if (nrow(res.metfrag) < 1){
           next
         } else {
@@ -36,9 +38,8 @@ for (i in 1:nrow(challenges)){
       }
       gc()
     }
-    # candidates <- data.frame(ID=as.character(res.metfrag$Identifier), SMILES=as.character(res.metfrag$SMILES))
-    # write.table(candidates, paste('challenges/candidates/', keggid, '.txt', sep = ''), row.names = FALSE, col.names = FALSE, quote = FALSE)
     # if (i%%50==0 | i==nrow(challenges)){
+      # write result every time
       write.csv(rank.metfrag, paste('result/search_result_pubchem_metfrag_40V.csv'))
     # }
 }
