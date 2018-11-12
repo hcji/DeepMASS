@@ -14,6 +14,8 @@ Metabolite identification is a great challenge restricting the metabolomics stud
 	conda install -c rdkit rdkit
 	# Keras
 	conda install keras
+	# IsoSpec
+	pip install IsoSpecPy == 1.0.7
 	
 ## Installation
 1. Download the model [here](https://www.researchgate.net/profile/Hongchao_Ji/publication/328822822_DeepMASS_Model_for_Deep_MSMS-Aided_Structural-similarity_Scoring_for_Unknown_Metabolites_Identification/data/5be4d6a5299bf1124fc41e39/model-40V.zip), then unzip it into **/model/40V** directory.
