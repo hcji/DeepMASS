@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from scipy import signal
 from scipy.sparse import csr_matrix, vstack, hstack
-from IsoSpecPy import IsoSpec
+from IsoSpecPy import IsoSpecPy
 from itertools import chain
 import json
 import requests
@@ -43,11 +43,13 @@ def progressBar(count,total,size):
 
 def get_score(pred, real):
     '''
-    Task: Evaluate the matching degree of DeepMASS score and FP score with dot product
-          when calculating FP score, some molecule may raising error, *compare_structure*
-          function will return -1 in such case. Here they are removed.
-    :param pred: DeepMASS score
-    :param real: FP score
+    Task: 
+        Evaluate the matching degree of DeepMASS score and FP score with dot product
+        when calculating FP score, some molecule may raising error, *compare_structure*
+        function will return -1 in such case. Here they are removed.
+    Parameters:
+        pred: array, DeepMASS score
+        real: array, score
     '''
     keep = np.where(real >= 0)[0] 
     if len(keep)<1:
@@ -59,10 +61,12 @@ def get_score(pred, real):
 
 def read_ms(csv, precursor = None, norm = True):
     '''
-    Task: Read spectrum from csv file
-    :param csv: file path of spectrum
-    :param precursor: m/z of precursor
-    :param norm: whether to normalizate the spectrum or not
+    Task: 
+        Read spectrum from csv file
+    Parameters:
+        csv: str, file path of spectrum
+        precursor: folat, m/z of precursor
+        norm: logic, whether to normalizate the spectrum or not
     '''
     spec = pd.read_csv(csv)
     spec = spec.iloc[:,range(2)]
@@ -76,15 +80,30 @@ def read_ms(csv, precursor = None, norm = True):
 	
 
 def isotope_pattern(formula, thres=0.99):
+    '''
+    Task: 
+        Generate theoretical isotope distribution
+    Parameters:
+        formula: str, chemical formula
+        thres: folat, abundance threshold
+    '''
     if type(formula) is not str:
         raise ValueError('input formula must be a character')
-    isotope = IsoSpec.IsoFromFormula(formula, thres)
+    isotope = IsoSpecPy.IsoSpec.IsoFromFormula(formula, thres)
     isotope = isotope.getConfsNumpy()
     output = pd.DataFrame({'mass': isotope[0], 'intensity': np.exp(isotope[1])})
     return output
     
 
 def compare_isotope(measured, expected, tolerance=0.001):
+    '''
+    Task: 
+        Compare theoretical isotope distribution and measured isotope distribution
+    Parameters:
+        measured: DataFrame, measured isotope distribution
+        expected: DataFrame, theoretical isotope distribution
+        tolerance: float, m/z tolerance
+    '''
     if (type(measured) is not pd.DataFrame) or (type(expected) is not pd.DataFrame):
         raise ValueError('input data must be pandas.DataFrame')
     measured['intensity'] = measured['intensity']/sum(measured['intensity'])
@@ -102,6 +121,15 @@ def compare_isotope(measured, expected, tolerance=0.001):
 
 
 def ms2vec(ms, precision=0.01, maxmz=2000):
+    '''
+    Task: 
+        Convert mass spectrum to (sparse) vector
+    Parameters:
+        ms: DataFrame, ms spectrum
+        precision: float, related to binning size 
+        maxmz: int, maximum m/z, related to length of vector
+    '''
+    # default, convert to sparse vector
     bits = int(1/precision)
     idx = round(ms['mz']*bits)
     val = ms['intensity']
@@ -109,6 +137,8 @@ def ms2vec(ms, precision=0.01, maxmz=2000):
     idx = idx[keep]
     val = val[keep]
     vec = csr_matrix((val, (np.zeros(len(idx)), idx)), shape=(1, bits*maxmz))
+    
+    # old codes, convert to dense vector
     '''
     vec = np.zeros(10*maxmz)
     for i in range(len(idx)):
@@ -119,6 +149,13 @@ def ms2vec(ms, precision=0.01, maxmz=2000):
 
 
 def formula2vec(formula, elements=['C', 'H', 'O', 'N', 'P', 'S']):
+    '''
+    Task: 
+        Convert formula vector
+    Parameters:
+        formula: str, chemical formula
+        elements: str list, elements
+    '''
     formula_p = re.findall(r'([A-Z][a-z]*)(\d*)', formula)
     vec = np.zeros(len(elements))
     for i in range(len(formula_p)):
@@ -134,15 +171,30 @@ def formula2vec(formula, elements=['C', 'H', 'O', 'N', 'P', 'S']):
 
 
 def fft_ccor(ts1, ts2, norm=True, output_type='sparse'):
+    '''
+    Task: 
+        Calculate fft cross correlation for (sparse) vector
+    Parameters:
+        ts1: csr_matrix, signal 1
+        ts2: csr_matrix, signal 2
+        norm: logic, norm the output
+        output_type: str, output sparse vector or dense vector
+    '''
+    
+    # convert to dense vector
     if type(ts1) is csr_matrix:
         ts1 = ts1.A.squeeze()
     if type(ts2) is csr_matrix:
         ts2 = ts2.A.squeeze()
+    
+    # old code, use fft
     '''
     fft_ts1 = nfft.fft(ts1)
     fft_ts2 = nfft.fft(ts2)
     output = ((1 / (1. * len(ts1))) * nfft.ifft(fft_ts1 * np.conjugate(fft_ts2)).real)
     '''
+    
+    # use scipy.sinal.correlate
     output = signal.correlate(ts1, ts2, mode='same', method='fft')
     maxccor = max(output)
     if norm:
@@ -155,9 +207,21 @@ def fft_ccor(ts1, ts2, norm=True, output_type='sparse'):
 
     
 def sparse_pearsonr(A, B):
+    '''
+    Task: 
+        Calculate pearson correlation for (sparse) vector
+        **This function is not used any more in the current project**
+    Parameters:
+        A: csr_matrix, signal 1
+        B: csr_matrix, signal 2
+    '''
+    # calculate base on definition.
+    # since A & B are sparse, take mean(A) and mean(B) as 0
     a = A.multiply(B).sum()
     b = np.sqrt(A.multiply(A).sum()) * np.sqrt(B.multiply(B).sum()) + 10 ** -99
     res = a/b
+    
+    # convert to dense vector and use scipy.stat.pearsonr
     '''
     from scipy.stat import pearsonr
     AA = A.toarray()[0]
@@ -167,7 +231,16 @@ def sparse_pearsonr(A, B):
     '''
     return res
 
+
 def sparse_cross_correlate(A, B):
+    '''
+    Task: 
+        Calculate cross pearson correlation for (sparse) vector
+        **This function is not used any more in the current project**
+    Parameters:
+        A: csr_matrix, signal 1
+        B: csr_matrix, signal 2
+    '''
     colA = A.tocoo().col
     colB = B.tocoo().col
     shifts = [colA-xx for xx in colB]
@@ -192,6 +265,15 @@ def sparse_cross_correlate(A, B):
   
     
 def compare_structure(smiles1, smiles2, fp_type='Morgan', sim_type='Dice'):
+    '''
+    Task: 
+        Compare structual similarity of two compound based on fingerprints.
+    Parameters:
+        smiles1: str, smiles of the compound 1
+        smiles2: str, smiles of the compound 2
+        fp_type: str, type of fingerprints
+        sim_type: str, method for calculating similarity
+    '''
     if fp_type == 'Morgan':
         getfp = lambda smi: AllChem.GetMorganFingerprint(Chem.MolFromSmiles(smi), 2, useFeatures=False)
     elif fp_type == 'MorganWithFeature':
@@ -223,6 +305,13 @@ def compare_structure(smiles1, smiles2, fp_type='Morgan', sim_type='Dice'):
 
 
 def search_formula(mass, ppm):
+    '''
+    Task: 
+        Search formula from formula database.
+    Parameters:
+        mass: float, exact mass of compound
+        ppm: float, ppm
+    '''
     mmin = mass - mass*ppm/10**6
     mmax = mass + mass*ppm/10**6
     lf = bisect.bisect_left(formulaDB['Exact mass'], mmin)
@@ -232,16 +321,30 @@ def search_formula(mass, ppm):
 
 
 def search_structure(formula):
+    '''
+    Task: 
+        Search chemical structure from structural database.
+    Parameters:
+        formula: str, chemical formula
+    '''
     structures = structureDB[structureDB['Formula']==formula]
     return structures
 
 
 def search_pubchem(formula, timeout=999):
+    '''
+    Task: 
+        Search chemical structure from pubchem.
+    Parameters:
+        formula: str, chemical formula
+    '''
+    # get pubchem cid based on formula
     cids = pc.get_cids(formula, 'formula', list_return='flat')
     idstring = ''
     smiles = []
     inchikey = []
     all_cids = []
+    # search pubchem via formula with pug
     for i, cid in enumerate(cids):
         idstring += ',' + str(cid)
         if ((i%100==99) or (i==len(cids)-1)):
@@ -266,6 +369,14 @@ def search_pubchem(formula, timeout=999):
      
 
 def get_data(pairs, spec_dir, includeY=True):
+    '''
+    Task: 
+        get predictor (X) and label (y) for train/predict. 
+    Parameters:
+        pairs: DataFrame, DataFrame from csv file, take data/kegg_pairs_refine.csv as example.
+        spec_dir: str, path of spectra files.
+        includeY: logic, whether to generate the label. (True for train dataset, False for predict data)
+    '''
     # data_X1 = []
     data_X1 = None
     data_X2 = []
@@ -322,6 +433,15 @@ def delete_rows_csr(mat, indices):
 
 
 def new_data(mass, formula, spectrum_file, energy='40V'):
+    '''
+    Task: 
+        get predictor (X) for new unknown spectra. 
+    Parameters:
+        mass: float, exact mass.
+        formula: chemical formula.
+        spec_dir: str, path of spectrum file.
+        energy: only 40V is support until now.
+    '''
     spec1 = read_ms(spectrum_file, mass+1.0078)
     spec_vec1 = ms2vec(spec1)
     mass1 = mass
@@ -352,6 +472,14 @@ def new_data(mass, formula, spectrum_file, energy='40V'):
     
 
 def build_model(energy='40V', Test=False, Save=True):
+    '''
+    Task: 
+        train DeepMASS model with simulated mass spectra. 
+    Parameters:
+        energy: only 40V is support until now.
+        Test: logic, whether to split dataset for test.
+        Save: logic, whether to save the model or not.
+    '''
     kegg_pairs = pd.read_csv('data/kegg_pairs_refine.csv')
     random_pairs = pd.read_csv('data/random_pairs_simulated.csv')
     spec_dir = 'data/spectra/simulated_spectra/' + energy
@@ -423,6 +551,14 @@ def build_model(energy='40V', Test=False, Save=True):
 
 
 def fine_tune(energy='40V', Test=False, Save=True):
+    '''
+    Task: 
+        fine tune DeepMASS model with measured mass spectra. 
+    Parameters:
+        energy: only 40V is support until now.
+        Test: logic, whether to split dataset for test.
+        Save: logic, whether to save the model or not.
+    '''
     kegg_pairs = pd.read_csv('data/kegg_pairs_refine.csv')
     random_pairs = pd.read_csv('data/random_pairs_measured.csv')
     spec_dir = 'data/spectra/measured_spectra/' + energy
@@ -478,6 +614,13 @@ def fine_tune(energy='40V', Test=False, Save=True):
 
 
 def leave_one_out_test(energy='40V', database='structureDB'):
+    '''
+    Task: 
+        leave one out test
+    Parameters:
+        energy: only 40V is support until now.
+        database: search in which database? structureDB or pubchem.
+    '''
     spec_dir = 'data/spectra/measured_spectra/' + energy
     knowns = pd.read_csv('data/known_compounds.csv')
     
@@ -571,6 +714,18 @@ def leave_one_out_test(energy='40V', database='structureDB'):
 
 
 def run_one_example(mass, formula, ms_file, energy='40V', thres = 0.5, database='structureDB'):
+    '''
+    Task: 
+        run DeepMASS workflow with a new spectrum.
+        **this is the only function for end user**
+    Parameters:
+        mass: float, exact mass.
+        formula: str, chemical formula.
+        ms_file: str, path of mass spectrum.
+        energy: only 40V is support until now.
+        thres: folat, 0-1, threshold of structural similarity of reference compound.
+        database: search in which database? structureDB or pubchem.
+    '''
     # load model
     json_file = open('model/' + energy + '/model_dnn_tuned.json', 'r') 
     loaded_model_json = json_file.read() 
@@ -622,7 +777,9 @@ if __name__ == '__main__':
     ccor = fft_ccor(ms_vec1.A.squeeze(), ms_vec2.A.squeeze()).A.squeeze()
     plt.plot(shifts, ccor)
     
-    mass = 135.054
-    formula = 'C5H5N5'
-    ms_file = 'experiment/spectra/Adenine.csv'
-    result, neighbors = run_one_example(mass, formula, ms_file, thres = 0.4)
+    '''
+    mass = 146.19
+    formula = 'C6H14N2O2'
+    spectrum_file = 'experiment/spectra/Lysine.csv'
+    result, neighbors = run_one_example(mass, formula, spectrum_file, energy='40V', thres = 0.5, database='structureDB')
+    '''
