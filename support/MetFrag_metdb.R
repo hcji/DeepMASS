@@ -1,5 +1,5 @@
-setwd('E:/project/DeepMASS/support')
-wd <- paste(getwd(), '/', sep='')
+setwd('E:/project/DeepMASS')
+wd <- paste(getwd(), '/support/', sep='')
 
 # since metfragR does not support custom database, we use metfragCL here
 metfrag = 'D:/MetFrag2.4.3-CL.jar'
@@ -17,14 +17,14 @@ for (i in 1:nrow(challenges)){
   true <- challenges[i, 'chebi']
   
   # write spectrum
-  fileConn <- file(description = "spectrum.txt", open = "w")
+  fileConn <- file(description = "support/spectrum.txt", open = "w")
   for (j in 1:nrow(spectrum)){
     cat(paste(spectrum[j,1], spectrum[j,2], '\n'), file = fileConn)
   }
   close(fileConn)
   
   # write parameter file
-  fileConn <- file(description = "parameter_file.txt", open = "w")
+  fileConn <- file(description = "support/parameter_file.txt", open = "w")
   cat(paste('PeakListPath = ', wd, "spectrum.txt", '\n', sep='') , file = fileConn)
   cat(paste('MetFragDatabaseType = LocalCSV', '\n', sep='') , file = fileConn)
   cat(paste('LocalDatabasePath = ', wd, 'metdb.csv', '\n', sep='') , file = fileConn)
@@ -36,7 +36,7 @@ for (i in 1:nrow(challenges)){
   close(fileConn)
   
   # write command line
-  cmdl <- paste('java -jar ', metfrag, ' ', "parameter_file.txt", sep='')
+  cmdl <- paste('java -jar ', metfrag, ' ', wd, "parameter_file.txt", sep='')
   shell(cmdl)
   
 }

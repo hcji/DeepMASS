@@ -21,9 +21,10 @@ for i in StructureDB.index:
   Name = StructureDB['ChEBI'][i] # use for judge whether the identification is right
   try:
       Mol = Chem.MolFromSmiles(SMILES)
-      InChi = Chem.MolToInchi(Mol)
+      SMILES = Chem.MolToSmiles(Mol) # standardize smiles
+      InChi = Chem.MolToInchi(Mol) # write inchi
   except:
-      InChi = ''
+      continue
   metdb.loc[i] = [Identifier, MonoisotopicMass, MolecularFormula, InChIKey1, SMILES, Name, InChi]
   
-metdb.to_csv('support/metdb.csv')
+metdb.to_csv('support/metdb.csv', index=False)
