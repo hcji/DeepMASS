@@ -4,7 +4,6 @@ wd <- paste(getwd(), '/support/', sep='')
 # since metfragR does not support custom database, we use metfragCL here
 metfrag = 'D:/MetFrag2.4.3-CL.jar'
 
-
 challenges <- read.csv('data/known_compounds.csv', stringsAsFactors = FALSE)
 rank.metfrag <- matrix(NA, nrow=nrow(challenges), ncol=2)
 colnames(rank.metfrag) <- c('kegg', 'rank')
@@ -45,7 +44,9 @@ for (i in 1:nrow(challenges)){
     next
   } else {
     name_split <- strsplit(res.metfrag$Name, ';')
-    rank <- which(sapply(name_split, function(n) true%in%n))
+    wh_true <- which(sapply(name_split, function(n) true%in%n))
+    score_true <- max(res.metfrag$Score[wh_true])
+    rank <- length(unique(as.character(res.metfrag$Identifier[res.metfrag$Score>score_true]))) + 1
     if(length(rank)==0){
       next
     } else {
