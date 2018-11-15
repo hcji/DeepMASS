@@ -32,11 +32,27 @@ for (i in 1:nrow(challenges)){
   cat(paste('NeutralPrecursorMass = ', mass, '\n', sep=''), file = fileConn)
   cat(paste('MetFragCandidateWriter = CSV', '\n') , file = fileConn)
   cat(paste('SampleName = example_1', '\n') , file = fileConn)
-  cat(paste('ResultsPath = .') , file = fileConn)
+  cat(paste('ResultsPath = ', wd, sep='') , file = fileConn)
   close(fileConn)
   
   # write command line
   cmdl <- paste('java -jar ', metfrag, ' ', wd, "parameter_file.txt", sep='')
   shell(cmdl)
   
+  # read result
+  res.metfrag <- read.csv(paste(wd, 'example_1.csv', sep=''), stringsAsFactors = FALSE)
+  if (nrow(res.metfrag) < 1){
+    next
+  } else {
+    name_split <- strsplit(res.metfrag$Name, ';')
+    rank <- which(sapply(name_split, function(n) true%in%n))
+    if(length(rank)==0){
+      next
+    } else {
+      cat(paste(keggid, ': ', rank,'/', nrow(res.metfrag), '\n', sep = ''))
+      rank.metfrag[i,] <- c(keggid, rank)
+    }
+  }
+  # write result every loop
+  write.csv(rank.metfrag, paste('result/search_result_metdb_metfrag_40V.csv'))
 }

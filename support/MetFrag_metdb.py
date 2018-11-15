@@ -21,7 +21,7 @@ for i in StructureDB.index:
   Name = StructureDB['ChEBI'][i] # use for judge whether the identification is right
   try:
       Mol = Chem.MolFromSmiles(SMILES)
-      SMILES = Chem.MolToSmiles(Mol) # standardize smiles
+      SMILES = Chem.MolToSmiles(Mol, kekuleSmiles=True) # standardize smiles
       InChi = Chem.MolToInchi(Mol) # write inchi
   except:
       continue

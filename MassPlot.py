@@ -12,6 +12,13 @@ import matplotlib.pyplot as plt
 from rdkit.Chem import MolFromSmiles, Draw
 
 
+def plot_ms(spectrum):
+    plt.figure(figsize=(6, 4))
+    plt.vlines(spectrum['mz'], np.zeros(spectrum.shape[0]), np.array(spectrum['intensity']), 'black') 
+    plt.axhline(0, color='black')
+    plt.show()
+
+
 def plot_compare_ms(spectrum1, spectrum2, tol=0.05):
     c_mz = []
     c_int = []

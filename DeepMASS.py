@@ -49,7 +49,7 @@ def get_score(pred, real):
         function will return -1 in such case. Here they are removed.
     Parameters:
         pred: array, DeepMASS score
-        real: array, score
+        real: array, Fingerprint score
     '''
     keep = np.where(real >= 0)[0] 
     if len(keep)<1:
