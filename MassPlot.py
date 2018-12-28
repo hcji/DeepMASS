@@ -19,7 +19,7 @@ def plot_ms(spectrum):
     plt.show()
 
 
-def plot_compare_ms(spectrum1, spectrum2, tol=0.05):
+def plot_compare_ms(spectrum1, spectrum2, tol=0.05, shift=18):
     c_mz = []
     c_int = []
     for i in spectrum1.index:
@@ -29,13 +29,25 @@ def plot_compare_ms(spectrum1, spectrum2, tol=0.05):
             c_mz.append(spectrum2['mz'][np.argmin(diffs)])
             c_int.append(spectrum1['intensity'][i])
             c_int.append(-spectrum2['intensity'][np.argmin(diffs)])
-    c_spec = pd.DataFrame({'mz':c_mz, 'intensity':c_int})   
+    c_spec = pd.DataFrame({'mz':c_mz, 'intensity':c_int}) 
+    
+    c_mz = []
+    c_int = []
+    for i in spectrum1.index:
+        diffs = abs(spectrum2['mz'] - spectrum1['mz'][i] - shift)
+        if min(diffs) < tol:
+            c_mz.append(spectrum1['mz'][i])
+            c_mz.append(spectrum2['mz'][np.argmin(diffs)])
+            c_int.append(spectrum1['intensity'][i])
+            c_int.append(-spectrum2['intensity'][np.argmin(diffs)])
+    c_spec1 = pd.DataFrame({'mz':c_mz, 'intensity':c_int})
     
     plt.figure(figsize=(6, 6))
     plt.vlines(spectrum1['mz'], np.zeros(spectrum1.shape[0]), np.array(spectrum1['intensity']), 'gray')
     plt.axhline(0, color='black')
     plt.vlines(spectrum2['mz'], np.zeros(spectrum2.shape[0]), -np.array(spectrum2['intensity']), 'gray')
     plt.vlines(c_spec['mz'], np.zeros(c_spec.shape[0]), c_spec['intensity'], 'red')
+    plt.vlines(c_spec1['mz'], np.zeros(c_spec1.shape[0]), c_spec1['intensity'], 'blue')
     plt.xlabel('m/z')
     plt.ylabel('Relative Intensity')
     plt.show()

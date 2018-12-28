@@ -11,12 +11,12 @@ import matplotlib.pyplot as plt
 from DeepMASS import read_ms, ms2vec, fft_ccor
 from MassPlot import plot_compare_ms
 
-spectrum1 = read_ms('data/spectra/measured_spectra/40V/C00002.csv')
-spectrum2 = read_ms('data/spectra/measured_spectra/40V/C00008.csv')
+spectrum1 = read_ms('data/spectra/measured_spectra/40V/C00006.csv')
+spectrum2 = read_ms('data/spectra/measured_spectra/40V/C00003.csv')
 # spectrum3 = spectrum2.copy()
 # spectrum3['mz'] = spectrum3['mz'] - 12
 
-plot_compare_ms(spectrum1, spectrum2)
+plot_compare_ms(spectrum1, spectrum2, shift=1000)
 # plot_compare_ms(spectrum1, spectrum3)
 
 vec1 = ms2vec(spectrum1)
