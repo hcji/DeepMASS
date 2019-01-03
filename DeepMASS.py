@@ -264,7 +264,7 @@ def sparse_cross_correlate(A, B):
     return res
   
     
-def compare_structure(smiles1, smiles2, fp_type='Morgan', sim_type='Tanimoto'):
+def compare_structure(smiles1, smiles2, fp_type='AtomPairs', sim_type='Tanimoto'):
     '''
     Task: 
         Compare structual similarity of two compound based on fingerprints.
@@ -283,7 +283,7 @@ def compare_structure(smiles1, smiles2, fp_type='Morgan', sim_type='Tanimoto'):
     elif fp_type == 'Topological':
         getfp = lambda smi: FingerprintMols.FingerprintMol(Chem.MolFromSmiles(smi))
     elif fp_type == 'AtomPairs':
-        getfp = lambda smi: Pairs.GetAtomPairFingerprint(Chem.MolFromSmiles(smi))
+        getfp = lambda smi: Pairs.GetAtomPairFingerprintAsBitVect(Chem.MolFromSmiles(smi))
     
     try:
         fp1 = getfp(smiles1)
