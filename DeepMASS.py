@@ -264,7 +264,7 @@ def sparse_cross_correlate(A, B):
     return res
   
     
-def compare_structure(smiles1, smiles2, fp_type='AtomPairs', sim_type='Tanimoto'):
+def compare_structure(smiles1, smiles2, fp_type='Morgan', sim_type='Dice'):
     '''
     Task: 
         Compare structual similarity of two compound based on fingerprints.
@@ -275,15 +275,15 @@ def compare_structure(smiles1, smiles2, fp_type='AtomPairs', sim_type='Tanimoto'
         sim_type: str, method for calculating similarity
     '''
     if fp_type == 'Morgan':
-        getfp = lambda smi: AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(smi), 2, useFeatures=False)
+        getfp = lambda smi: AllChem.GetMorganFingerprint(Chem.MolFromSmiles(smi), 2, useFeatures=False)
     elif fp_type == 'MorganWithFeature':
-        getfp = lambda smi: AllChem.GetMorganFingerprintAsBitVect(Chem.MolFromSmiles(smi), 2, useFeatures=True)
+        getfp = lambda smi: AllChem.GetMorganFingerprint(Chem.MolFromSmiles(smi), 2, useFeatures=True)
     elif fp_type == 'MACCS':
         getfp = lambda smi: Chem.MACCSkeys.GenMACCSKeys(Chem.MolFromSmiles(smi))
     elif fp_type == 'Topological':
         getfp = lambda smi: FingerprintMols.FingerprintMol(Chem.MolFromSmiles(smi))
     elif fp_type == 'AtomPairs':
-        getfp = lambda smi: Pairs.GetAtomPairFingerprintAsBitVect(Chem.MolFromSmiles(smi))
+        getfp = lambda smi: Pairs.GetAtomPairFingerprint(Chem.MolFromSmiles(smi))
     
     try:
         fp1 = getfp(smiles1)
