@@ -4,7 +4,7 @@ wd <- paste(getwd(), '/support/', sep='')
 # since metfragR does not support custom database, we use metfragCL here
 metfrag = 'D:/MetFrag2.4.3-CL.jar'
 
-mf <- 'experiment/spectra/Arginine.csv'
+mf <- 'experiment/spectra/Q-TOF/Arginine.csv'
 formula <- 'C6H14N4O2'
 mass <- 174.112
 spectrum <- read.csv(mf)

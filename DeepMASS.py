@@ -56,7 +56,7 @@ def get_score(pred, real):
         return 0
     else:
         score = sum(np.array(pred[keep]) * np.array(real[keep])) / len(keep)
-    return round(score, 3)
+    return round(score, 2)
 
 
 def read_ms(csv, precursor = None, norm = True):

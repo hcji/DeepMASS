@@ -23,6 +23,6 @@ start_time = time.time()
 mass = 146.105
 formula = 'C6H14N2O2'
 spectrum_file = 'experiment/spectra/IT-TOF/Lysine.csv'
-result, neighbors = run_one_example(mass, formula, spectrum_file, energy='40V', thres = 0.5, database='structureDB')
+result, neighbors = run_one_example(mass, formula, spectrum_file, energy='40V', thres = 0.6, database='structureDB')
 end_time = time.time()
 print('The running time is ' + str(round(end_time-start_time, 2)) + 's')
