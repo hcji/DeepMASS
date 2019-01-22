@@ -7,6 +7,7 @@ Created on Fri Sep 28 14:49:47 2018
 
 import re
 import gc
+import os
 import sys
 import bisect
 import numpy as np
@@ -623,6 +624,7 @@ def leave_one_out_test(energy='40V', database='structureDB'):
     '''
     spec_dir = 'data/spectra/measured_spectra/' + energy
     knowns = pd.read_csv('data/known_compounds.csv')
+    all_spectra = os.listdir(spec_dir)
     
     # load model
     json_file = open('model/' + energy + '/model_dnn_tuned.json', 'r') 
@@ -635,6 +637,8 @@ def leave_one_out_test(energy='40V', database='structureDB'):
     ranks = []
     totals = []
     for i in knowns.index:
+        if knowns['kegg'][i] + '.csv' not in all_spectra:
+            continue
         if database == 'pubchem':
             if np.isnan(knowns['pubchem'][i]):
                 ranks.append(np.nan)

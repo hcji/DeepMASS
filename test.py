@@ -6,6 +6,6 @@ Created on Tue Oct  9 14:09:55 2018
 """
 
 from DeepMASS import build_model, fine_tune, leave_one_out_test
-build_model(Test=False, Save=True)
-fine_tune(Test=False, Save=True)
+build_model(energy='40V', Test=False, Save=True)
+fine_tune(energy='40V', Test=False, Save=True)
 leave_one_out_test(energy='40V', database='structureDB')
