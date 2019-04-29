@@ -23,7 +23,12 @@ Metabolite identification is a great challenge restricting the metabolomics stud
 	
 ## Installation
 1. Download the model [here](https://www.researchgate.net/profile/Hongchao_Ji/publication/328822822_DeepMASS_Model_for_Deep_MSMS-Aided_Structural-similarity_Scoring_for_Unknown_Metabolites_Identification/data/5be4d6a5299bf1124fc41e39/model-40V.zip), then unzip it into **/model/40V** directory.
-2. Download the repo and unzip **data/spectra.zip**
+2. Clone the repo and put spectra files in **data/spectra** directory
+
+## Note
+### 2019/04/29
+Under the requirement of the owner of experimental spectra (MetDNA dataset), the dataset has been removed. If you have already download the dataset, please keep it private, and the dataset can be only used to reproduce the results of DeepMASS paper.  
+If you need the dataset for other use, please contact with the [owner](http://www.metabolomics-shanghai.org/software.php).  
 
 ## Usage
 Take **example.py** as an example for metabolite identification.   
