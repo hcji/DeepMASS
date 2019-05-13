@@ -27,8 +27,9 @@ Metabolite identification is a great challenge restricting the metabolomics stud
 
 ## Note
 ### 2019/04/29
-Under the requirement of the owner of experimental spectra (MetDNA dataset), the dataset has been removed. If you have already download the dataset, please keep it private, and the dataset can be only used to reproduce the results of DeepMASS paper.  
-If you need the dataset for other use, please contact with the [owner](http://www.metabolomics-shanghai.org/software.php).  
+Under the requirement of the owner of experimental spectra (MetDNA dataset), the dataset has been removed. If you have already download the dataset, please keep it private, and the dataset can be only used to reproduce the results of DeepMASS paper. If you need the dataset for other use, please contact with the [owner](http://www.metabolomics-shanghai.org/software.php).   
+### 2019/05/13
+Since the experimental spectra has been removed, this package cannot be run directly. You can train your own model with your in-house database. Otherwise, you can wait some days. I m trying to include spectra from public databases.  
 
 ## Usage
 Take **example.py** as an example for metabolite identification.   
