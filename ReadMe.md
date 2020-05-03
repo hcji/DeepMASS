@@ -34,3 +34,6 @@ Since the experimental spectra has been removed, this package cannot be run dire
 ## Usage
 Take **example.py** as an example for metabolite identification.   
 If you want to train a model based on your in-house database, please put your spectra files in to **data/spectra** directory and run **test.py**.
+
+## Contact
+ji.hongchao@foxmail.com
