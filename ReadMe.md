@@ -9,6 +9,9 @@ DeepMASS is a known-to-unknown metabolite identification workflow, which include
 ## Motivation
 Metabolite identification is a great challenge restricting the metabolomics study. One of the main reasons is the limited number of high-quality MS/MS spectra of metabolites included in database. Using the transformational relationship and structural similarity between metabolites is a promising strategy to extend the number of metabolites can be identified by the existing database. Hence, we present the DeepMASS workflow, which is proved to be an effective way to predict the structural similarities between the unknown metabolite and the metabolites existing in the database.
 
+## Cite
+[Deep MS/MS-Aided Structural-Similarity Scoring for Unknown Metabolite Identification](https://pubs.acs.org/doi/10.1021/acs.analchem.8b05405)
+
 ## Depends
 	Anaconda for python 3.6
 	# RDKit
